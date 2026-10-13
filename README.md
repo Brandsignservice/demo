@@ -1,29 +1,64 @@
-# LUMORA HOME
+# AUREVÉ — AI Shopping Assistant demo
 
-A responsive, fictional luxury furniture sales demonstration for ARXEN AI, built with React and Vite.
+A premium, fictional luxury jewellery and watch website created by **ARXEN AI** to show UK luxury retailers how an AI Shopping Assistant can improve product discovery, answer customer questions, and capture qualified enquiries.
 
-## Run
+> AUREVÉ is a fictional demonstration brand created by ARXEN AI. All products, prices, and specifications are illustrative.
+
+## Run it
 
 ```sh
 npm install
-npm run dev
+npm run dev        # http://localhost:5173 (bound to 0.0.0.0)
+npm run build      # type-checks, then produces a static site in dist/
+npm run preview    # serves the production build
 ```
 
-The preview runs on port 5173. `npm run build` produces the deployable static site in `dist/`; `npm run preview` serves the production build.
+Stack: React 18, TypeScript, Vite, Tailwind CSS v4, React Router, lucide-react.
 
-## Demo features
+## What the demo shows
 
-- 12 fictional catalog products with descriptions, prices, materials, sizes, finishes, and delivery/return details.
-- Category navigation, text search, sorting, favorites, product details, finish selection, and a quantity-adjustable shopping bag.
-- Local, deterministic shopping assistant: budget and category filtering, compact-room recommendations, room dimensions (e.g. `10 x 12 feet`), product comparisons, matching accessories, product questions, delivery and returns.
-- Four one-click conversation starters and conversation reset.
-- Validated designer enquiry form with consent. Enquiries are stored only in `sessionStorage` under `lumora-demo-enquiry`. No emails, CRM requests, payments, or real orders occur.
-- Responsive layouts, keyboard controls, accessible control names, and reduced-motion support.
+- **Home:** hero with *Find Your Perfect Piece.*, four one-click assistant scenarios, a curated edit, category tiles, an assistant preview, and the ARXEN AI section.
+- **Catalogue:** 12 fictional products across Jewellery, Watches, Engagement Rings, and a curated Gifts view. Each product has a detail page with price, materials, dimensions, colours, stock status (demo data), specifications, gemstone certificate status, care instructions, delivery and returns, and matching pieces.
+- **Filters:** budget, style, and occasion filters plus sorting on every collection page.
+- **Comparison:** add up to three pieces from any card, then compare price, materials, style, dimensions, specifications, and care on `/compare`. Shared links work as `/compare?ids=a,b`.
+- **AI Shopping Assistant:** the floating **✦ Ask AUREVÉ AI** button opens a conversation with quick actions, product cards with *View Product* links, budget and occasion follow-ups, comparisons, matching suggestions, care and material answers, delivery and returns, and a human-advisor enquiry form.
+- **Enquiry form:** validated on the home assistant and on `/contact`. It is a **demonstration form**: it does not contact a sales team and does not store or send data.
 
-## AI and security
+## How the assistant works
 
-No external AI API is required or configured. The assistant intentionally demonstrates common shopping flows rather than pretending to be an unrestricted language model. No API keys are included or requested. Any future AI integration must use a server-side endpoint with secrets in server environment variables, never `VITE_*` variables or browser source. `.env` files are ignored by Git.
+The assistant runs entirely in the browser with **no external AI API**.
 
-## Assets and limitations
+- `src/lib/assistant.ts` is a deterministic conversation engine. It extracts category, budget (for example `under $1,500`, `between $500 and $1,000`, `1.5k`), style, occasion, recipient, and materials, and product names from free text. It then scores and ranks products from the catalogue and gives a reason for each recommendation.
+- It answers only from `src/data/products.ts`. Where a detail is not recorded, it says so. For example, the gemstone certificate is stated as "Not provided in this demo record" rather than invented.
+- Conversation state carries follow-ups, such as a budget given after "Help me choose an anniversary gift", or "Classic" after a gift search.
 
-Furniture and lifestyle imagery are illustrative remote Unsplash photographs, not exact depictions of the fictional products. Google Fonts supplies DM Sans and Manrope, with system sans-serif fallbacks. These assets need an internet connection. The local assistant itself does not need network access. Favorites and the demo bag are kept in React state and reset on refresh; enquiry data lasts only for the current browser session.
+To extend the logic, add intents or phrases in `respond()` and add product records in `src/data/products.ts`.
+
+## Connecting a live AI service (optional, not configured)
+
+No key is included, requested, or read by the frontend. If you later connect a model, call it from a **server-side function** (for example a serverless route) that reads the key from a server environment variable. Never place keys in `VITE_*` variables or in browser code. Keep the local engine as the fallback so the demo works offline.
+
+## Structure
+
+```
+src/
+  data/        products.ts (12 fictional products), types.ts, brand.ts (copy, nav, scenarios, policies)
+  lib/         assistant.ts (conversation engine), compare.ts, filters.ts, format.ts
+  context/     CompareContext.tsx (comparison tray), ChatContext.tsx (assistant conversation)
+  components/  Header, Footer, ProductCard, ProductImage, CompareTray, CompareTable,
+               LeadForm, FilterBar, StockPill, DemoLabel, Reveal, chat/ChatWidget, chat/ChatMessageView
+  pages/       Home, Collection (jewellery, watches, engagement-rings, gifts), Product, Compare, Contact, NotFound
+public/images/ hero.webp and products/*.webp (AI-generated studio imagery for fictional products)
+```
+
+## Imagery
+
+All product and hero photographs are original, AI-generated studio images created for this fictional brand. They are not photographs of real products. Images are WebP, lazy-loaded, and sized to avoid layout shift. If an image is missing, the card shows an on-brand placeholder.
+
+## Limitations
+
+- Stock status, delivery, and returns are illustrative demo data. No orders, payments, or live inventory exist.
+- Prices are shown in US dollars, as specified for this demo.
+- Fonts (Cormorant Garamond and Manrope) load from Google Fonts. The system serif is used as a fallback offline.
+- Favourites, the comparison selection, and the chat conversation reset on refresh.
+- The "Explore AI Solutions" button points to the contact page with `?enquiry=arxen`. Replace `ARXEN_AI_URL` in `src/data/brand.ts` with ARXEN AI's live URL.
